@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurema Monteiro | Terapeuta & Mentora</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configurações Tailwind personalizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        editorial: ['"Cormorant Garamond"', 'serif'],
+                        clean: ['"Montserrat"', 'sans-serif'],
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in-down': 'fadeInDown 0.8s ease-out',
+                        'gradient-x': 'gradient-x 6s ease infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeInDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'gradient-x': {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel para JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* Textura de Ruído (Noise) para efeito de papel */
+        .bg-noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        /* Shimmer Effect */
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+
+        body {
+            background-color: #FDFBF9;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- ÍCONES (SVG Components inline para não precisar de biblioteca externa) ---
+        const Icons = {
+            Sparkles: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            ),
+            Brain: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            ),
+            Heart: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            ),
+            MapPin: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            ),
+            ArrowRight: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            ),
+            Instagram: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            ),
+            MessageCircle: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            ),
+            Mail: ({ size = 20, className }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            )
+        };
+
+        const SocialIcon = ({ Icon }) => (
+            <a 
+                href="#" 
+                className="text-[#8D6E63] hover:text-[#5D4037] hover:scale-110 transition-transform duration-300 bg-white/40 p-3 rounded-full backdrop-blur-sm border border-white/20 shadow-sm"
+            >
+                <Icon size={18} />
+            </a>
+        );
+
+        function App() {
+            // DADOS CONFIGURÁVEIS
+            const profileData = {
+                name: "Jurema Monteiro",
+                title: "Terapeuta & Mentora de Mulheres",
+                methodology: "Investigar • Identificar • Ressignificar",
+                // AQUI ESTÁ A IMAGEM ATUALIZADA - Certifique-se que o arquivo jurema-moteiro.jpg está na mesma pasta
+                image: "jurema-moteiro.jpg", 
+            };
+
+            const links = [
+                {
+                    id: 1,
+                    text: "Iniciar Jornada de Cura",
+                    subtext: "Agendamento via WhatsApp",
+                    url: "https://wa.me/seu_numero_aqui",
+                    icon: Icons.Sparkles,
+                    highlight: true, 
+                },
+                {
+                    id: 2,
+                    text: "Como funciona a Mentoria?",
+                    subtext: "Entenda o processo",
+                    url: "#como-funciona",
+                    icon: Icons.Brain,
+                    highlight: false,
+                },
+                {
+                    id: 3,
+                    text: "Universo Emocional",
+                    subtext: "Conteúdo no Instagram",
+                    url: "https://instagram.com/seu_perfil",
+                    icon: Icons.Heart,
+                    highlight: false,
+                },
+                {
+                    id: 4,
+                    text: "Localização",
+                    subtext: "Ver no mapa",
+                    url: "https://maps.google.com",
+                    icon: Icons.MapPin,
+                    highlight: false,
+                }
+            ];
+
+            return (
+                <div className="min-h-screen bg-[#FDFBF9] font-sans selection:bg-[#D4A5A5] selection:text-white overflow-x-hidden text-slate-800">
+                    
+                    {/* Camada de Textura (Noise) */}
+                    <div className="bg-noise"></div>
+
+                    {/* Container Centralizado - Estilo App */}
+                    <main className="max-w-md mx-auto min-h-screen relative flex flex-col items-center">
+                        
+                        {/* --- FUNDO DECORATIVO ORGÂNICO --- */}
+                        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+                            {/* Bolha Superior (Rose) */}
+                            <div className="absolute -top-20 -left-20 w-96 h-96 bg-[#EBCBCB] rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-blob"></div>
+                            {/* Bolha Inferior (Bege Dourado) */}
+                            <div className="absolute top-1/2 -right-20 w-80 h-80 bg-[#E6D5C3] rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-blob" style={{ animationDelay: '2s' }}></div>
+                            {/* Bolha Inferior Esquerda (Marsala Suave) */}
+                            <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#D4A5A5] rounded-full mix-blend-multiply filter blur-[80px] opacity-30 animate-blob" style={{ animationDelay: '4s' }}></div>
+                        </div>
+
+                        <div className="relative z-10 w-full px-6 py-12 flex flex-col items-center gap-8">
+                            
+                            {/* --- HEADER --- */}
+                            <header className="flex flex-col items-center text-center w-full">
+                                {/* Imagem com Borda Dupla Orgânica */}
+                                <div className="relative mb-6">
+                                    <div className="absolute inset-0 rounded-full border border-[#D4A5A5]/30 scale-110 animate-pulse"></div>
+                                    <div className="p-1.5 rounded-full bg-white/50 backdrop-blur-sm border border-white shadow-lg">
+                                        <img 
+                                            src={profileData.image} 
+                                            alt={profileData.name} 
+                                            className="w-28 h-28 rounded-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700 ease-in-out"
+                                            onError={(e) => {
+                                                e.target.onerror = null; 
+                                                e.target.src = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=388'; // Fallback se a imagem local falhar
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Tipografia Editorial */}
+                                <h1 className="font-editorial text-4xl sm:text-5xl text-[#5D4037] font-medium tracking-tight leading-none mb-2">
+                                    {profileData.name}
+                                </h1>
+                                
+                                <p className="font-clean text-xs sm:text-sm text-[#8D6E63] uppercase tracking-[0.2em] font-medium mb-5">
+                                    {profileData.title}
+                                </p>
+
+                                {/* Separador Elegante */}
+                                <div className="w-12 h-[1px] bg-gradient-to-r from-transparent via-[#D4A5A5] to-transparent mb-5"></div>
+
+                                <p className="font-editorial text-lg text-[#8D6E63] italic opacity-90">
+                                    "{profileData.methodology}"
+                                </p>
+                            </header>
+
+                            {/* --- CARDS / LINKS --- */}
+                            <section className="w-full flex flex-col gap-4">
+                                {links.map((link) => (
+                                    <a
+                                        key={link.id}
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`
+                                            relative overflow-hidden group w-full p-1 rounded-2xl transition-all duration-500
+                                            ${link.highlight ? 'shadow-xl hover:shadow-2xl hover:-translate-y-1' : 'hover:-translate-y-0.5'}
+                                        `}
+                                    >
+                                        {/* Efeito de Borda Gradiente para o Destaque */}
+                                        {link.highlight && (
+                                            <div className="absolute inset-0 bg-gradient-to-r from-[#D48F8F] via-[#E6BcbC] to-[#D48F8F] bg-[length:200%_200%] animate-gradient-x opacity-80"></div>
+                                        )}
+
+                                        <div className={`
+                                            relative flex items-center justify-between p-4 h-full rounded-xl transition-all duration-300
+                                            ${link.highlight 
+                                                ? 'bg-gradient-to-br from-[#BC7878] to-[#9E5F5F] text-white border border-transparent' 
+                                                : 'bg-white/40 backdrop-blur-md border border-white/60 hover:bg-white/60 text-[#5D4037] shadow-sm hover:shadow-md'
+                                            }
+                                        `}>
+                                            {/* Brilho interno no botão destaque */}
+                                            {link.highlight && <div className="animate-shimmer"></div>}
+
+                                            <div className="flex items-center gap-4 z-10">
+                                                <div className={`
+                                                    p-2.5 rounded-full transition-transform duration-300 group-hover:scale-110
+                                                    ${link.highlight ? 'bg-white/20 text-white' : 'bg-[#F5EBE0] text-[#8D6E63]'}
+                                                `}>
+                                                    <link.icon size={20} />
+                                                </div>
+                                                
+                                                <div className="flex flex-col text-left">
+                                                    <span className={`font-clean font-medium text-sm sm:text-base ${link.highlight ? 'tracking-wide' : 'tracking-normal'}`}>
+                                                        {link.text}
+                                                    </span>
+                                                    {link.subtext && (
+                                                        <span className={`text-[10px] sm:text-xs font-clean uppercase tracking-wider mt-0.5 ${link.highlight ? 'text-white/80' : 'text-[#A1887F]'}`}>
+                                                            {link.subtext}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Seta discreta */}
+                                            <div className={`transform transition-all duration-300 -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 ${link.highlight ? 'text-white' : 'text-[#D4A5A5]'}`}>
+                                                <Icons.ArrowRight size={16} />
+                                            </div>
+                                        </div>
+                                    </a>
+                                ))}
+                            </section>
+
+                            {/* --- FOOTER --- */}
+                            <footer className="mt-auto pt-8 pb-4 w-full flex flex-col items-center gap-6">
+                                <div className="flex items-center gap-6">
+                                    <SocialIcon Icon={Icons.Instagram} />
+                                    <div className="w-1 h-1 rounded-full bg-[#D4A5A5]"></div>
+                                    <SocialIcon Icon={Icons.MessageCircle} />
+                                    <div className="w-1 h-1 rounded-full bg-[#D4A5A5]"></div>
+                                    <SocialIcon Icon={Icons.Mail} />
+                                </div>
+
+                                <p className="font-editorial text-2xl text-[#8D6E63]/40 text-center leading-snug max-w-[200px]">
+                                    cure a si mesma
+                                </p>
+
+                                <span className="text-[9px] font-clean text-[#BCAAA4] tracking-[0.2em] uppercase">
+                                    © 2024 Jurema M.
+                                </span>
+                            </footer>
+
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
