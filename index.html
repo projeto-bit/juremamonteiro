@@ -19,7 +19,8 @@
                     },
                     animation: {
                         'blob': 'blob 7s infinite',
-                        'fade-in': 'fadeIn 1s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
                         'shimmer': 'shimmer 3s infinite linear',
                         'gradient-x': 'gradient-x 6s ease infinite',
                     },
@@ -33,6 +34,10 @@
                         fadeIn: {
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
                         },
                         shimmer: {
                             '0%': { transform: 'translateX(-100%)' },
@@ -48,18 +53,13 @@
         }
     </script>
 
-    <!-- React (Motor do Site) - Usando versões estáveis -->
+    <!-- React e Bibliotecas -->
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel (Tradutor de Código) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-
-    <!-- Fontes Elegantes do Google -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
 
     <style>
-        /* Efeito de Papel Granulado (Noise) */
         .bg-noise {
             position: fixed;
             top: 0;
@@ -72,8 +72,6 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
         body { background-color: #FDFBF9; }
-        
-        /* Spinner de carregamento simples */
         .loader {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #D4A5A5;
@@ -83,89 +81,143 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Scrollbar personalizada para o modal */
+        .modal-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #D4A5A5; 
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
-    <!-- Este elemento é onde o React vai desenhar o site -->
     <div id="root" class="min-h-screen flex flex-col items-center justify-center text-[#8D6E63] gap-4">
-        <!-- Conteúdo que aparece ANTES do site carregar (se travar, você verá isso) -->
         <div class="loader"></div>
-        <p class="font-sans text-sm tracking-widest uppercase animate-pulse">Carregando Cartão Digital...</p>
+        <p class="font-sans text-sm tracking-widest uppercase animate-pulse">Carregando...</p>
     </div>
 
-    <!-- O CÓDIGO DO SITE COMEÇA AQUI -->
     <script type="text/babel">
-        // --- ÍCONES (Desenhados direto no código para não falhar) ---
+        // --- ÍCONES ---
         const Icons = {
-            Sparkles: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-            ),
-            Brain: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
-            ),
-            Heart: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-            ),
-            MapPin: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            ),
-            ArrowRight: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            ),
-            Instagram: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-            ),
-            MessageCircle: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-            ),
-            Mail: ({ size = 20, className }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            )
+            Sparkles: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>,
+            Brain: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>,
+            Heart: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+            MapPin: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
+            ArrowRight: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>,
+            Instagram: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>,
+            MessageCircle: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>,
+            Mail: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
+            X: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+            Clock: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            Calendar: ({ size = 20, className }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
         };
 
-        const SocialIcon = ({ Icon }) => (
-            <a href="#" className="text-[#8D6E63] hover:text-[#5D4037] hover:scale-110 transition-transform duration-300 bg-white/40 p-3 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">
+        const SocialIcon = ({ Icon, url }) => (
+            <a href={url} target="_blank" className="text-[#8D6E63] hover:text-[#5D4037] hover:scale-110 transition-transform duration-300 bg-white/40 p-3 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">
                 <Icon size={18} />
             </a>
         );
+
+        // --- COMPONENTE MODAL (Janela "Como Funciona") ---
+        const Modal = ({ isOpen, onClose, title, children }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                    <div className="absolute inset-0 bg-stone-900/30 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+                    <div className="bg-[#FDFBF9] w-full max-w-sm rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-slide-up border border-white/50 max-h-[80vh] flex flex-col">
+                        <div className="bg-gradient-to-r from-[#E6BcbC] to-[#D4A5A5] p-6 text-white relative flex-shrink-0">
+                            <h2 className="font-editorial text-2xl font-medium tracking-wide">{title}</h2>
+                            <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors text-white">
+                                <Icons.X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4 overflow-y-auto modal-scroll font-clean text-[#5D4037]">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
         function App() {
             const profileData = {
                 name: "Jurema Monteiro",
                 title: "Terapeuta & Mentora de Mulheres",
                 methodology: "Investigar • Identificar • Ressignificar",
-                // Tenta carregar a imagem local, senão usa o link de backup
                 image: "jurema-moteiro.jpg", 
                 fallbackImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=388"
             };
 
+            const [imgSrc, setImgSrc] = React.useState(profileData.image);
+            const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+            // LINKS ATUALIZADOS COM OS DADOS FORNECIDOS
             const links = [
-                { id: 1, text: "Iniciar Jornada de Cura", subtext: "Agendamento via WhatsApp", url: "https://wa.me/seu_numero_aqui", icon: Icons.Sparkles, highlight: true },
-                { id: 2, text: "Como funciona a Mentoria?", subtext: "Entenda o processo", url: "#como-funciona", icon: Icons.Brain, highlight: false },
-                { id: 3, text: "Universo Emocional", subtext: "Conteúdo no Instagram", url: "https://instagram.com/seu_perfil", icon: Icons.Heart, highlight: false },
-                { id: 4, text: "Localização", subtext: "Ver no mapa", url: "https://maps.google.com", icon: Icons.MapPin, highlight: false }
+                { 
+                    id: 1, 
+                    text: "Iniciar Jornada de Cura", 
+                    subtext: "Agendamento via WhatsApp", 
+                    url: "https://wa.me/554198438932", // Link do WhatsApp Real
+                    icon: Icons.Sparkles, 
+                    highlight: true,
+                    type: "link" 
+                },
+                { 
+                    id: 2, 
+                    text: "Como funciona a Mentoria?", 
+                    subtext: "Entenda o processo", 
+                    url: "#", 
+                    icon: Icons.Brain, 
+                    highlight: false,
+                    type: "modal" // Este botão abre o modal
+                },
+                { 
+                    id: 3, 
+                    text: "Universo Emocional", 
+                    subtext: "Conteúdo no Instagram", 
+                    url: "https://www.instagram.com/terapeutajurema/", // Link do Instagram Real
+                    icon: Icons.Heart, 
+                    highlight: false,
+                    type: "link"
+                },
+                { 
+                    id: 4, 
+                    text: "Localização", 
+                    subtext: "Ver no mapa", 
+                    url: "https://maps.google.com", 
+                    icon: Icons.MapPin, 
+                    highlight: false,
+                    type: "link"
+                }
             ];
 
-            // Estado para gerenciar erro de imagem
-            const [imgSrc, setImgSrc] = React.useState(profileData.image);
+            const handleLinkClick = (e, link) => {
+                if (link.type === "modal") {
+                    e.preventDefault();
+                    setIsModalOpen(true);
+                }
+            };
 
             return (
                 <div className="min-h-screen bg-[#FDFBF9] font-sans selection:bg-[#D4A5A5] selection:text-white overflow-x-hidden text-slate-800 animate-fade-in">
-                    
                     <div className="bg-noise"></div>
 
                     <main className="max-w-md mx-auto min-h-screen relative flex flex-col items-center">
-                        
                         {/* Fundo Decorativo */}
                         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
                             <div className="absolute -top-20 -left-20 w-96 h-96 bg-[#EBCBCB] rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-blob"></div>
                             <div className="absolute top-1/2 -right-20 w-80 h-80 bg-[#E6D5C3] rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-blob" style={{ animationDelay: '2s' }}></div>
-                            <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#D4A5A5] rounded-full mix-blend-multiply filter blur-[80px] opacity-30 animate-blob" style={{ animationDelay: '4s' }}></div>
                         </div>
 
                         <div className="relative z-10 w-full px-6 py-12 flex flex-col items-center gap-8">
                             
-                            {/* Header */}
+                            {/* --- HEADER --- */}
                             <header className="flex flex-col items-center text-center w-full">
                                 <div className="relative mb-6">
                                     <div className="absolute inset-0 rounded-full border border-[#D4A5A5]/30 scale-110 animate-pulse"></div>
@@ -178,39 +230,35 @@
                                         />
                                     </div>
                                 </div>
-
                                 <h1 className="font-editorial text-4xl sm:text-5xl text-[#5D4037] font-medium tracking-tight leading-none mb-2">
                                     {profileData.name}
                                 </h1>
-                                
                                 <p className="font-clean text-xs sm:text-sm text-[#8D6E63] uppercase tracking-[0.2em] font-medium mb-5">
                                     {profileData.title}
                                 </p>
-
                                 <div className="w-12 h-[1px] bg-gradient-to-r from-transparent via-[#D4A5A5] to-transparent mb-5"></div>
-
                                 <p className="font-editorial text-lg text-[#8D6E63] italic opacity-90">
                                     "{profileData.methodology}"
                                 </p>
                             </header>
 
-                            {/* Botões */}
+                            {/* --- LISTA DE LINKS --- */}
                             <section className="w-full flex flex-col gap-4">
                                 {links.map((link) => (
                                     <a
                                         key={link.id}
                                         href={link.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        onClick={(e) => handleLinkClick(e, link)}
+                                        target={link.type === 'link' ? "_blank" : undefined}
+                                        rel={link.type === 'link' ? "noopener noreferrer" : undefined}
                                         className={`
-                                            relative overflow-hidden group w-full p-1 rounded-2xl transition-all duration-500
+                                            relative overflow-hidden group w-full p-1 rounded-2xl transition-all duration-500 cursor-pointer
                                             ${link.highlight ? 'shadow-xl hover:shadow-2xl hover:-translate-y-1' : 'hover:-translate-y-0.5'}
                                         `}
                                     >
                                         {link.highlight && (
                                             <div className="absolute inset-0 bg-gradient-to-r from-[#D48F8F] via-[#E6BcbC] to-[#D48F8F] bg-[length:200%_200%] animate-gradient-x opacity-80"></div>
                                         )}
-
                                         <div className={`
                                             relative flex items-center justify-between p-4 h-full rounded-xl transition-all duration-300
                                             ${link.highlight 
@@ -219,7 +267,6 @@
                                             }
                                         `}>
                                             {link.highlight && <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>}
-
                                             <div className="flex items-center gap-4 z-10">
                                                 <div className={`
                                                     p-2.5 rounded-full transition-transform duration-300 group-hover:scale-110
@@ -227,7 +274,6 @@
                                                 `}>
                                                     <link.icon size={20} />
                                                 </div>
-                                                
                                                 <div className="flex flex-col text-left">
                                                     <span className={`font-clean font-medium text-sm sm:text-base ${link.highlight ? 'tracking-wide' : 'tracking-normal'}`}>
                                                         {link.text}
@@ -239,7 +285,6 @@
                                                     )}
                                                 </div>
                                             </div>
-
                                             <div className={`transform transition-all duration-300 -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 ${link.highlight ? 'text-white' : 'text-[#D4A5A5]'}`}>
                                                 <Icons.ArrowRight size={16} />
                                             </div>
@@ -248,26 +293,60 @@
                                 ))}
                             </section>
 
-                            {/* Footer */}
+                            {/* --- FOOTER --- */}
                             <footer className="mt-auto pt-8 pb-4 w-full flex flex-col items-center gap-6">
                                 <div className="flex items-center gap-6">
-                                    <SocialIcon Icon={Icons.Instagram} />
+                                    <SocialIcon Icon={Icons.Instagram} url="https://www.instagram.com/terapeutajurema/" />
                                     <div className="w-1 h-1 rounded-full bg-[#D4A5A5]"></div>
-                                    <SocialIcon Icon={Icons.MessageCircle} />
+                                    <SocialIcon Icon={Icons.MessageCircle} url="https://wa.me/554198438932" />
                                     <div className="w-1 h-1 rounded-full bg-[#D4A5A5]"></div>
-                                    <SocialIcon Icon={Icons.Mail} />
+                                    <SocialIcon Icon={Icons.Mail} url="#" />
                                 </div>
-
                                 <p className="font-editorial text-2xl text-[#8D6E63]/40 text-center leading-snug max-w-[200px]">
                                     cure a si mesma
                                 </p>
-
                                 <span className="text-[9px] font-clean text-[#BCAAA4] tracking-[0.2em] uppercase">
                                     © 2024 Jurema M.
                                 </span>
                             </footer>
                         </div>
                     </main>
+
+                    {/* --- MODAL DE COMO FUNCIONA --- */}
+                    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Como funciona?">
+                        <div className="space-y-6">
+                            <p className="leading-relaxed text-sm text-stone-600">
+                                Meu trabalho é focado no <strong>Universo Emocional Feminino</strong>. Através de uma abordagem acolhedora, ajudo você a:
+                            </p>
+                            
+                            <ul className="space-y-3">
+                                <li className="flex items-start gap-3">
+                                    <div className="bg-rose-100 p-1.5 rounded-full text-rose-500 mt-0.5"><Icons.Sparkles size={14} /></div>
+                                    <span className="text-sm"><strong>Investigar</strong> a raiz dos bloqueios emocionais.</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="bg-rose-100 p-1.5 rounded-full text-rose-500 mt-0.5"><Icons.Brain size={14} /></div>
+                                    <span className="text-sm"><strong>Identificar</strong> padrões que se repetem.</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="bg-rose-100 p-1.5 rounded-full text-rose-500 mt-0.5"><Icons.Heart size={14} /></div>
+                                    <span className="text-sm"><strong>Ressignificar</strong> sua história com amor.</span>
+                                </li>
+                            </ul>
+
+                            <div className="bg-[#FFF5F5] p-4 rounded-xl border border-rose-100">
+                                <h3 className="font-editorial text-xl text-[#8B4545] mb-2">Agendamento</h3>
+                                <p className="text-xs text-stone-500 mb-3">
+                                    As sessões são realizadas online ou presencialmente. Para verificar disponibilidade, clique abaixo:
+                                </p>
+                                <a href="https://wa.me/554198438932" target="_blank" className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#D48F8F] text-white rounded-lg text-sm font-medium hover:bg-[#C07575] transition-colors">
+                                    <Icons.Calendar size={16} />
+                                    Agendar Sessão
+                                </a>
+                            </div>
+                        </div>
+                    </Modal>
+
                 </div>
             );
         }
